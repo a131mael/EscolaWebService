@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- =========== FULL CONFIGURATION FILE ================================== -->
+<faces-config version="2.0" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd">
+	<navigation-rule>
+		<from-view-id>/index.xhtml</from-view-id>
+		<navigation-case>
+			<from-outcome>team</from-outcome>
+			<to-view-id>/pages/team/index.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+	</navigation-rule>
+	<navigation-rule>
+		<from-view-id>/pages/team/players.xhtml</from-view-id>
+		<navigation-case>
+			<from-outcome>player</from-outcome>
+			<to-view-id>/pages/team/player.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+	</navigation-rule>
+	<navigation-rule>
+		<from-view-id>/pages/team/player.xhtml</from-view-id>
+		<navigation-case>
+			<from-outcome>ok</from-outcome>
+			<to-view-id>/pages/team/players.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+	</navigation-rule>
+	<application>
+		<locale-config>
+			<default-locale>ptBR</default-locale>
+		</locale-config>
+		<resource-bundle>
+			<base-name>org.messages.messages</base-name>
+			<var>msg</var>
+		</resource-bundle>
+	</application>
+	<!-- <application> <resource-bundle> <base-name>com.sigc.web.bundle.message</base-name> 
+		<var>bundle</var> </resource-bundle> <locale-config> <default-locale>pt</default-locale> 
+		<supported-locale>en</supported-locale> <supported-locale>es</supported-locale> 
+		</locale-config> <message-bundle> com.sigc.web.bundle.message </message-bundle> 
+		</application> <managed-bean> <managed-bean-name>LocaleMB</managed-bean-name> 
+		<managed-bean-class> com.sigc.web.bundle.LocaleMB </managed-bean-class> <managed-bean-scope>application</managed-bean-scope> 
+		</managed-bean> -->
+</faces-config>
