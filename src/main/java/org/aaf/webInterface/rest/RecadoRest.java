@@ -8,12 +8,17 @@ import javax.inject.Inject;
 import javax.naming.NamingException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.aaf.dto.RecadoDTO;
 import org.aaf.webInterface.util.ServiceLocator;
 import org.escola.service.RecadoService;
+
+import com.cedarsoftware.util.io.JsonWriter;
 
 @Path("/recados")
 @RequestScoped
@@ -25,28 +30,32 @@ public class RecadoRest {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<RecadoDTO> listAll() {
-        return getService().findAllDTO();
+    public Response listAll() {
+		Response.ResponseBuilder builder = null;
+		builder = Response.ok();
+		builder.entity(JsonWriter.objectToJson(getService().findAllDTO()));
+		return builder.build();
     }
 
-   /* @GET
-	@Path("/discipline/{discipline}")
+    @GET
+	@Path("/{idMember}/{ordinal}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getTeansLeague(@PathParam("discipline") String discipline) {
+	public Response getTeansLeague(@PathParam("idMember") String idMember,@PathParam("ordinal") String ordinal) {
 		Response.ResponseBuilder builder = null;
 
-		List<Question> questions = questionService.findByDiscipline(discipline);
+		RecadoDTO recado = getService().findAllDTO().get(Integer.parseInt(ordinal));
 
-		if (questions == null) {
+		if (recado == null) {
 			builder = Response.status(Response.Status.BAD_REQUEST).entity("erro");
 			throw new WebApplicationException(Response.Status.NOT_FOUND);
 		} else {
 			builder = Response.ok();
-			builder.entity(JsonWriter.objectToJson(questions));
+			builder.entity(JsonWriter.objectToJson(recado));
 		}
 
 		return builder.build();
 	}
+    /*
     @GET
 	@Path("/disciplineYear")
 	@Produces(MediaType.APPLICATION_JSON)

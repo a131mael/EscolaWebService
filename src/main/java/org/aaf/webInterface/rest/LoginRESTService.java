@@ -1,29 +1,19 @@
 package org.aaf.webInterface.rest;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.naming.NamingException;
-import javax.validation.ConstraintViolationException;
-import javax.validation.ValidationException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.aaf.dto.MemberDTO;
-import org.aaf.dto.RecadoDTO;
-import org.aaf.dto.TeamDTO;
 import org.aaf.webInterface.util.ServiceLocator;
 import org.escola.service.MemberRegistration;
-import org.escola.service.RecadoService;
 
 import com.cedarsoftware.util.io.JsonWriter;
 
@@ -37,7 +27,7 @@ public class LoginRESTService {
 	@GET
 	@Path("/automatic/{phoneNumber}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getTeansLeague(@PathParam("phoneNumber") String phoneNumber) {
+	public Response loginAutomatico(@PathParam("phoneNumber") String phoneNumber) {
 		Response.ResponseBuilder builder = null;
 
 		MemberDTO member = getService().findByPhoneDTO(phoneNumber);
@@ -53,6 +43,45 @@ public class LoginRESTService {
 		return builder.build();
 	}
 
+	@GET
+	@Path("/{login}/{senha}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response loginUsuarioESenha(@PathParam("login") String login, @PathParam("senha") String senha) {
+		Response.ResponseBuilder builder = null;
+
+		MemberDTO member = getService().findByLoginSenha(login, senha);
+
+		if (member == null) {
+			builder = Response.status(Response.Status.BAD_REQUEST).entity("erro");
+			throw new WebApplicationException(Response.Status.NOT_FOUND);
+		} else {
+			builder = Response.ok();
+			builder.entity(JsonWriter.objectToJson(member));
+		}
+
+		return builder.build();
+	}
+	
+	@GET
+	@Path("/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response loginUsuarioESenha(@PathParam("id") String id) {
+		Response.ResponseBuilder builder = null;
+
+		MemberDTO member = getService().findByIdDTO(Long.parseLong(id));
+
+		if (member == null) {
+			builder = Response.status(Response.Status.BAD_REQUEST).entity("erro");
+			throw new WebApplicationException(Response.Status.NOT_FOUND);
+		} else {
+			builder = Response.ok();
+			builder.entity(JsonWriter.objectToJson(member));
+		}
+
+		return builder.build();
+	}
+
+	
 	/*
 	 * @GET
 	 * 

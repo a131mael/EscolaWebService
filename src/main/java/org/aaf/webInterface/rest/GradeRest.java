@@ -1,7 +1,5 @@
 package org.aaf.webInterface.rest;
 
-import java.util.List;
-
 import javax.ejb.Stateful;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
