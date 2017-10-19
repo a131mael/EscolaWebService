@@ -29,9 +29,11 @@ public class LoginRESTService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response loginAutomatico(@PathParam("phoneNumber") String phoneNumber) {
 		Response.ResponseBuilder builder = null;
-
-		MemberDTO member = getService().findByPhoneDTO(phoneNumber);
-
+		MemberDTO member = null;
+		Object retorno = getService().findByPhoneDTO(phoneNumber);
+		if(retorno != null){
+			member = (MemberDTO)retorno;
+		}
 		if (member == null) {
 			builder = Response.status(Response.Status.BAD_REQUEST).entity("erro");
 			throw new WebApplicationException(Response.Status.NOT_FOUND);
@@ -48,8 +50,11 @@ public class LoginRESTService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response loginUsuarioESenha(@PathParam("login") String login, @PathParam("senha") String senha) {
 		Response.ResponseBuilder builder = null;
-
-		MemberDTO member = getService().findByLoginSenha(login, senha);
+		MemberDTO member = null;
+		Object retorno = getService().findByLoginSenha(login, senha);
+		if(retorno != null){
+			member = (MemberDTO)retorno;
+		}
 
 		if (member == null) {
 			builder = Response.status(Response.Status.BAD_REQUEST).entity("erro");

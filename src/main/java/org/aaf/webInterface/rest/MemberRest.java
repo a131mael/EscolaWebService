@@ -12,24 +12,17 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.aaf.dto.MemberDTO;
-import org.aaf.dto.RecadoDTO;
 import org.aaf.webInterface.util.ServiceLocator;
-import org.escola.model.Member;
 import org.escola.service.MemberRegistration;
-import org.escola.service.RecadoService;
 
 import com.cedarsoftware.util.io.JsonReader;
-import com.cedarsoftware.util.io.JsonWriter;
 
 @Path("/members")
 @RequestScoped
@@ -43,7 +36,7 @@ public class MemberRest {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createQuestion(String member) {
+    public Response save(String member) {
 
         Response.ResponseBuilder builder = null;
 

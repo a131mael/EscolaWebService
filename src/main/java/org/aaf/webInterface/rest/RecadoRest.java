@@ -1,12 +1,19 @@
 package org.aaf.webInterface.rest;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.Stateful;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.naming.NamingException;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -14,10 +21,13 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.aaf.dto.MemberDTO;
 import org.aaf.dto.RecadoDTO;
+import org.aaf.dto.RecadoDestinatarioDTO;
 import org.aaf.webInterface.util.ServiceLocator;
 import org.escola.service.RecadoService;
 
+import com.cedarsoftware.util.io.JsonReader;
 import com.cedarsoftware.util.io.JsonWriter;
 
 @Path("/recados")
@@ -34,6 +44,16 @@ public class RecadoRest {
 		Response.ResponseBuilder builder = null;
 		builder = Response.ok();
 		builder.entity(JsonWriter.objectToJson(getService().findAllDTO()));
+		return builder.build();
+    }
+    
+    @GET
+    @Path("/{idMember}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getMessageByMember(@PathParam("idMember") String idMember) {
+		Response.ResponseBuilder builder = null;
+		builder = Response.ok();
+		builder.entity(JsonWriter.objectToJson(getService().findAllDTO(idMember)));
 		return builder.build();
     }
 
@@ -55,6 +75,62 @@ public class RecadoRest {
 
 		return builder.build();
 	}
+
+    @GET
+	@Path("/receiver/{idRecado}/{idMember}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getRecadoDestinatario(@PathParam("idRecado") String idRecado,@PathParam("idMember") String idMember) {
+		Response.ResponseBuilder builder = null;
+
+		RecadoDestinatarioDTO recadoDestinatarioDTO = getService().findRecadoDestinatario(idRecado,idMember);
+
+		if (recadoDestinatarioDTO == null) {
+			builder = Response.status(Response.Status.BAD_REQUEST).entity("erro");
+			throw new WebApplicationException(Response.Status.NOT_FOUND);
+		} else {
+			builder = Response.ok();
+			builder.entity(JsonWriter.objectToJson(recadoDestinatarioDTO));
+		}
+
+		return builder.build();
+	}
+
+    
+    @POST
+    @Path("/answer")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response saveAwser(String resposta) {
+
+        Response.ResponseBuilder builder = null;
+
+        try {
+            // Validates member using bean validation
+            //validateMember(member);
+        	RecadoDestinatarioDTO dto = (RecadoDestinatarioDTO) JsonReader.jsonToJava(resposta);
+            getService().saveAwnser(dto);
+            
+            // Create an "ok" response
+            builder = Response.ok().entity(dto);
+        } catch (ConstraintViolationException ce) {
+            // Handle bean validation issues
+            builder = createViolationResponse(ce.getConstraintViolations());
+        } catch (ValidationException e) {
+            // Handle the unique constrain violation
+            Map<String, String> responseObj = new HashMap<>();
+            responseObj.put("email", "Email taken");
+            builder = Response.status(Response.Status.CONFLICT).entity(responseObj);
+        } catch (Exception e) {
+            // Handle generic exceptions
+            Map<String, String> responseObj = new HashMap<>();
+            responseObj.put("error", e.getMessage());
+            builder = Response.status(Response.Status.BAD_REQUEST).entity(responseObj);
+        }
+
+        return builder.build();
+    }
+
+    
     /*
     @GET
 	@Path("/disciplineYear")
@@ -145,6 +221,19 @@ public class RecadoRest {
 
         return Response.status(Response.Status.BAD_REQUEST).entity(responseObj);
     }*/
+    
+    private Response.ResponseBuilder createViolationResponse(Set<ConstraintViolation<?>> violations) {
+        //log.fine("Validation completed. violations found: " + violations.size());
+
+        Map<String, String> responseObj = new HashMap<>();
+
+        for (ConstraintViolation<?> violation : violations) {
+            responseObj.put(violation.getPropertyPath().toString(), violation.getMessage());
+        }
+
+        return Response.status(Response.Status.BAD_REQUEST).entity(responseObj);
+    }
+    
     
     public RecadoService getService(){
     	try {
