@@ -21,11 +21,10 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.aaf.dto.MemberDTO;
-import org.aaf.dto.RecadoDTO;
-import org.aaf.dto.RecadoDestinatarioDTO;
-import org.aaf.webInterface.util.ServiceLocator;
-import org.escola.service.RecadoService;
+import org.aaf.escolar.RecadoDTO;
+import org.aaf.escolar.RecadoDestinatarioDTO;
+import org.escolar.service.RecadoService;
+import org.escolar.util.ServiceLocator;
 
 import com.cedarsoftware.util.io.JsonReader;
 import com.cedarsoftware.util.io.JsonWriter;
@@ -129,9 +128,8 @@ public class RecadoRest {
 
         return builder.build();
     }
-
     
-    /*
+   /* 
     @GET
 	@Path("/disciplineYear")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -149,10 +147,10 @@ public class RecadoRest {
 		}
 
 		return builder.build();
-	}
+	}*/
 
     
-    @GET
+   /* @GET
     @Path("/{id:[0-9][0-9]*}")
     @Produces(MediaType.APPLICATION_JSON)
     public Question lookupMemberById(@PathParam("id") long id) {
@@ -161,9 +159,9 @@ public class RecadoRest {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
         return question;
-    }
+    }*/
 
-    @POST
+    /*@POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createQuestion(Question question) {
@@ -197,10 +195,10 @@ public class RecadoRest {
         }
 
         return builder.build();
-    }
+    }*/
 
 
-    private void validateQuestion(Question question) throws ConstraintViolationException, ValidationException {
+    /*private void validateQuestion(Question question) throws ConstraintViolationException, ValidationException {
         // Create a bean validator and check for issues.
         Set<ConstraintViolation<Question>> violations = validator.validate(question);
 
@@ -208,19 +206,8 @@ public class RecadoRest {
             throw new ConstraintViolationException(new HashSet<ConstraintViolation<?>>(violations));
         }
     }
-
-    
-    private Response.ResponseBuilder createViolationResponse(Set<ConstraintViolation<?>> violations) {
-        log.fine("Validation completed. violations found: " + violations.size());
-
-        Map<String, String> responseObj = new HashMap<>();
-
-        for (ConstraintViolation<?> violation : violations) {
-            responseObj.put(violation.getPropertyPath().toString(), violation.getMessage());
-        }
-
-        return Response.status(Response.Status.BAD_REQUEST).entity(responseObj);
-    }*/
+*/
+      
     
     private Response.ResponseBuilder createViolationResponse(Set<ConstraintViolation<?>> violations) {
         //log.fine("Validation completed. violations found: " + violations.size());
@@ -238,7 +225,7 @@ public class RecadoRest {
     public RecadoService getService(){
     	try {
     		if(recadoService == null){
-    			recadoService = (RecadoService) ServiceLocator.getInstance().getEjb(RecadoService.class.getSimpleName(), RecadoService.class.getName());
+    			recadoService = (RecadoService) ServiceLocator.getInstance().getEjbGeneric(RecadoService.class.getSimpleName(), RecadoService.class.getName());
     		}
 		} catch (NamingException e) {
 			e.printStackTrace();

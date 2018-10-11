@@ -12,7 +12,7 @@ package org.aaf.webInterface.util;
 public class Constant {
     
     public static String ContextoGlobalEJB = "java:global";
-    public static String Projeto = "EscolaWebService";
+    public static String Projeto = "EscolarWebService";
     public static String ProjetoEJB = "";
     public static String barra = "/";
     

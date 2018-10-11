@@ -3,8 +3,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.aaf.webInterface</groupId>
-	<artifactId>webInterface</artifactId>
+	<groupId>org.aaf.escolar</groupId>
+	<artifactId>webServiceTefamel</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>WildFly Quickstarts: webInterface</name>
@@ -73,19 +73,23 @@
     
     <dependencies>
     	<dependency>
-			<groupId>org.escola.EscolaDTO</groupId>
-			<artifactId>EscolaDTO</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<!-- <scope>system</scope> -->
+			 <groupId>EscolarDTO</groupId>
+  			 <artifactId>org.aaf.escolar</artifactId>
+  			 <version>0.0.1-SNAPSHOT</version>
+  			 <type>jar</type>
 			<!-- <systemPath>path/to/myejbproject.jar</systemPath> -->
 		</dependency>
 		
 		<dependency>
-			<groupId>EscolaServices</groupId>
-			<artifactId>org.aaf.services</artifactId>
+			<groupId>org.escolar.service</groupId>
+			<artifactId>EscolarServices</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.aaf.escolar</groupId>
+			<artifactId>EscolarDTO</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<scope>compile</scope>
-			<!-- <systemPath>path/to/myejbproject.jar</systemPath> -->
 		</dependency>
     
         <!-- First declare the APIs we depend on and need for compilation. All of them are provided by JBoss -->

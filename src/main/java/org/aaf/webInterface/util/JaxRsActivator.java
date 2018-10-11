@@ -13,21 +13,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ 
 package org.aaf.webInterface.util;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-/**
+*//**
  * A class extending {@link Application} and annotated with @ApplicationPath is the Java EE 7 "no XML" approach to activating
  * JAX-RS.
  * 
  * <p>
  * Resources are served relative to the servlet path specified in the {@link ApplicationPath} annotation.
  * </p>
- */
+ *//*
 @ApplicationPath("/rest")
 public class JaxRsActivator extends Application {
-    /* class body intentionally left blank */
+     class body intentionally left blank 
 }
+*/
