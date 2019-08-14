@@ -111,32 +111,24 @@ public class LocationRest {
         try {
             // Validates member using bean validation
             //validateMember(member);
-        	System.out.println("ENTREI NO SAVE REST");
         	LocationDTO dtoResponse = (LocationDTO) JsonReader.jsonToJava(member);
-        	System.out.println("Converti o string em dto");
         	LocationDTO dto = getService().saveCar(dtoResponse);
-        	System.out.println("SALVO");
             // Create an "ok" response
             builder = Response.ok().entity(JsonWriter.objectToJson(dto));
-            System.out.println("build ok");
         } catch (ConstraintViolationException ce) {
-        	System.out.println("CAGO INICIO");
             // Handle bean validation issues
             builder = createViolationResponse(ce.getConstraintViolations());
         } catch (ValidationException e) {
-        	System.out.println("CAGO MEDIO");
             // Handle the unique constrain violation
             Map<String, String> responseObj = new HashMap<>();
             responseObj.put("email", "Email taken");
             builder = Response.status(Response.Status.CONFLICT).entity(responseObj);
         } catch (Exception e) {
-        	System.out.println("CAGO FIM");
             // Handle generic exceptions
             Map<String, String> responseObj = new HashMap<>();
             responseObj.put("error", e.getMessage());
             builder = Response.status(Response.Status.BAD_REQUEST).entity(responseObj);
         }
-        System.out.println("Retorno ok");
         return builder.build();
     }
 
