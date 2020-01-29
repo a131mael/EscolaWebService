@@ -1,10 +1,12 @@
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\rest\LocationRest.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\JsonReader.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\JSONPRequestFilter.java
+C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\rest\AlunoRest.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\Convertes.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\JaxRsActivator.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\RestfulApp.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\i18n\LanguageBean.java
+C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\rest\MemberRest.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\escola\controller\MemberController.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\rest\LoginRESTService.java
 C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\EndPoints.java

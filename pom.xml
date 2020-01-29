@@ -72,13 +72,13 @@
     </dependencyManagement>
     
     <dependencies>
-    	<dependency>
+    	<!-- <dependency>
 			 <groupId>EscolarDTO</groupId>
   			 <artifactId>org.aaf.escolar</artifactId>
   			 <version>0.0.1-SNAPSHOT</version>
   			 <type>jar</type>
-			<!-- <systemPath>path/to/myejbproject.jar</systemPath> -->
-		</dependency>
+			<systemPath>path/to/myejbproject.jar</systemPath>
+		</dependency> -->
 		
 		<dependency>
 			<groupId>org.escolar.service</groupId>
@@ -89,7 +89,7 @@
 		<dependency>
 			<groupId>org.aaf.escolar</groupId>
 			<artifactId>EscolarDTO</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
     
         <!-- First declare the APIs we depend on and need for compilation. All of them are provided by JBoss -->

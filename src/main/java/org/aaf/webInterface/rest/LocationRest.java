@@ -113,8 +113,11 @@ public class LocationRest {
             //validateMember(member);
         	LocationDTO dtoResponse = (LocationDTO) JsonReader.jsonToJava(member);
         	LocationDTO dto = getService().saveCar(dtoResponse);
+        	LocationDTO dto2 = new LocationDTO();
+        	dto2.setId(dto.getId());
+        	
             // Create an "ok" response
-            builder = Response.ok().entity(JsonWriter.objectToJson(dto));
+            builder = Response.ok().entity(JsonWriter.objectToJson(dto2));
         } catch (ConstraintViolationException ce) {
             // Handle bean validation issues
             builder = createViolationResponse(ce.getConstraintViolations());

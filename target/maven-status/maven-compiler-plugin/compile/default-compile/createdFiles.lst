@@ -1,11 +1,13 @@
 org\aaf\webInterface\rest\LocationRest.class
+org\aaf\webInterface\rest\AlunoRest.class
 org\aaf\webInterface\util\Service.class
 org\aaf\webInterface\rest\LoginRESTService.class
-org\aaf\webInterface\util\JsonReader.class
 org\aaf\webInterface\util\Constant.class
 org\aaf\webInterface\rest\RecadoRest.class
 org\aaf\webInterface\util\JSONPRequestFilter$1$1.class
-org\aaf\webInterface\util\EndPoints.class
 org\aaf\webInterface\util\JSONPRequestFilter$1.class
-org\aaf\webInterface\util\Resources.class
 org\aaf\webInterface\util\JSONPRequestFilter.class
+org\aaf\webInterface\rest\MemberRest.class
+org\aaf\webInterface\util\JsonReader.class
+org\aaf\webInterface\util\EndPoints.class
+org\aaf\webInterface\util\Resources.class
