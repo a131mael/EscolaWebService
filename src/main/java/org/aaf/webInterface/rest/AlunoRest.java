@@ -40,16 +40,11 @@ public class AlunoRest {
     								  @PathParam("mesBoleto") String mesBoleto,
     								  @PathParam("email") String email) {
      
-    	System.out.println("xxpt 000 ");
     	Response.ResponseBuilder builder = null;
 
     	long idcrianca = Long.parseLong(idStudent);
-    	System.out.println("xxpt 001 ");
-    	System.out.println("xxpt 002 ");
     	int mesBoletoInt = Integer.parseInt(mesBoleto);
-    	System.out.println("xxpt 003 ");
 		String erro = getService().enviarBoletoEmail(idcrianca, mesBoletoInt, email);		 
-		System.out.println("xxpt 004 ");
 		if (erro != null) {
 			builder = Response.status(Response.Status.BAD_REQUEST).entity("erro");
 			throw new WebApplicationException(Response.Status.NOT_FOUND);

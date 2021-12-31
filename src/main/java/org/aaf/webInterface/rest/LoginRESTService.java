@@ -51,9 +51,9 @@ public class LoginRESTService {
 	public Response loginUsuarioESenha(@PathParam("login") String login, @PathParam("senha") String senha) {
 		Response.ResponseBuilder builder = null;
 		MemberDTO member = null;
-		Object retorno = getService().findByLoginSenha(login, senha);
+		MemberDTO retorno = getService().findMemberDTO(login, senha);
 		if (retorno != null) {
-			member = (MemberDTO) retorno;
+			member = retorno;
 		}
 
 		if (member == null) {

@@ -1,6 +1,10 @@
 package org.aaf.webInterface.rest;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -21,42 +25,22 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.aaf.escolar.LocationDTO;
-import org.escolar.model.Localizacao;
-import org.escolar.service.LocationService;
+import org.aaf.escolar.LocationRotaDTO;
+import org.escolar.model.LocalizacaoRota;
+import org.escolar.service.LocationRotaService;
 import org.escolar.util.ServiceLocator;
 
 import com.cedarsoftware.util.io.JsonReader;
 import com.cedarsoftware.util.io.JsonWriter;
 
-@Path("/locations")
+@Path("/locationsRota")
 @RequestScoped
 @Stateful
-public class LocationRest {
+public class LocationRotaRest {
        
 	@Inject
-    private LocationService locationService;
+    private LocationRotaService locationService;
 
-/*    @GET
-    @Path("/gradeStudent/{idStudent}/{discipline}/{turn}/{rec}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getGrade(@PathParam("idStudent") String idStudent,@PathParam("discipline") String discipline,@PathParam("turn") String turn,@PathParam("rec") String rec) {
-     
-    	Response.ResponseBuilder builder = null;
-
-    	Float grade = getService().getAVGrade(Long.parseLong(idStudent),  DisciplinaEnum.values()[Integer.parseInt(discipline)], BimestreEnum.values()[Integer.parseInt(turn)], Boolean.parseBoolean(rec));
-    	
-		if (grade == null || grade.isInfinite() || grade.isNaN()) {
-			builder = Response.status(Response.Status.BAD_REQUEST).entity("erro");
-			throw new WebApplicationException(Response.Status.NOT_FOUND);
-		} else {
-			builder = Response.ok();
-			builder.entity(JsonWriter.objectToJson(grade));
-		}
-
-		return builder.build();
-    }
-*/
 	@GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response listAll() {
@@ -87,13 +71,56 @@ public class LocationRest {
     }
 	
 	@GET
+    @Path("/all/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public synchronized Response getLocationByIdentificador(@PathParam("name") String uiiD) {
+		Response.ResponseBuilder builder = null;
+		builder = Response.ok();
+		
+		List<LocationRotaDTO> locs = getService().findByName(uiiD);
+		builder.entity(JsonWriter.objectToJson(locs));
+		return builder.build();
+    }
+	
+	@GET
+    @Path("/all/{name}/{dataUltimaAtualizacao}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public synchronized Response getLocationNovasByIdentificador(@PathParam("name") String uiiD, @PathParam("dataUltimaAtualizacao") String dataUltimaAtualizacao) {
+		Response.ResponseBuilder builder = null;
+		builder = Response.ok();
+		Date date1 = null;
+		TimeZone.setDefault(TimeZone.getTimeZone("America/Sao_Paulo"));
+		try {
+			StringBuilder sb2 = new StringBuilder();
+			if(dataUltimaAtualizacao != null && dataUltimaAtualizacao.length() > 10){
+				if(dataUltimaAtualizacao != null && dataUltimaAtualizacao.length() > 10){
+					StringBuilder sb = new StringBuilder();
+					sb.append(dataUltimaAtualizacao);
+					sb2.append(sb.substring(0, 10));	
+					sb2.append(" ");
+					sb2.append(sb.substring(10));
+				}
+			}
+			
+			System.out.println("dataUltimaAtualizacaopica de los sacos" + sb2.toString());
+			date1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(sb2.toString());
+			
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}  
+		List<LocationRotaDTO> locs = getService().findByName(uiiD,date1);
+		builder.entity(JsonWriter.objectToJson(locs));
+		return builder.build();
+    }
+	
+	@GET
     @Path("/name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     public synchronized Response getLocationByName(@PathParam("name") String uiiD) {
 		Response.ResponseBuilder builder = null;
 		builder = Response.ok();
-		Localizacao loc = getService().findByName(uiiD);
-		LocationDTO locDTO = null;
+		LocalizacaoRota loc = getService().findRotabyName(uiiD);
+		LocationRotaDTO locDTO = null;
 		if(loc != null){
 			locDTO = loc.getDTO();	
 		}
@@ -101,19 +128,19 @@ public class LocationRest {
 		return builder.build();
     }
 	
-	
 	@POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public synchronized Response saveLocation(String member) {
+		TimeZone.setDefault(TimeZone.getTimeZone("America/Sao_Paulo"));
         Response.ResponseBuilder builder = null;
 
         try {
             // Validates member using bean validation
             //validateMember(member);
-        	LocationDTO dtoResponse = (LocationDTO) JsonReader.jsonToJava(member);
-        	LocationDTO dto = getService().saveCar(dtoResponse);
-        	LocationDTO dto2 = new LocationDTO();
+        	LocationRotaDTO dtoResponse = (LocationRotaDTO) JsonReader.jsonToJava(member);
+        	LocationRotaDTO dto = getService().saveNewLocation(dtoResponse);
+        	LocationRotaDTO dto2 = new LocationRotaDTO();
         	dto2.setId(dto.getId());
         	
             // Create an "ok" response
@@ -147,10 +174,10 @@ public class LocationRest {
         return Response.status(Response.Status.BAD_REQUEST).entity(responseObj);
     }
 
-    public LocationService getService(){
+    public LocationRotaService getService(){
     	try {
     		if(locationService == null){
-    			locationService = (LocationService) ServiceLocator.getInstance().getLocationService(LocationService.class.getSimpleName(), LocationService.class.getName());
+    			locationService = (LocationRotaService) ServiceLocator.getInstance().getLocationRotaService(LocationRotaService.class.getSimpleName(), LocationRotaService.class.getName());
     		}
 		} catch (NamingException e) {
 			e.printStackTrace();
