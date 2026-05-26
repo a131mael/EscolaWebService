@@ -129,6 +129,16 @@ public class RecadoRest {
         return builder.build();
     }
     
+    
+    public void enviarNotificacaoProximidade() {
+		
+		
+	}
+
+
+    
+    
+    
    /* 
     @GET
 	@Path("/disciplineYear")

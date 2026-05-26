@@ -1,203 +1,155 @@
 package org.aaf.webInterface.rest;
 
+import org.aaf.escolar.MemberDTO;
+import org.escolar.model.Member;
+import org.escolar.service.MemberRegistration;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateful;
+import javax.enterprise.context.RequestScoped;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import javax.ejb.Stateful;
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.naming.NamingException;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.ValidationException;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.aaf.escolar.MemberDTO;
-import org.escolar.service.MemberRegistration;
-import org.escolar.util.ServiceLocator;
-
-import com.cedarsoftware.util.io.JsonReader;
 
 @Path("/members")
 @RequestScoped
 @Stateful
 public class MemberRest {
-       
-    @Inject
+
+    @EJB
     private MemberRegistration memberRegistration;
-    
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response save(String member) {
-    	System.out.println("Salvando novo member");
-        Response.ResponseBuilder builder = null;
 
+    // -----------------------------------------------------------------------
+    // POST /members — registo (existente, mantido)
+    // -----------------------------------------------------------------------
+    @POST
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response save(String body) {
         try {
-        	MemberDTO dto = (MemberDTO) JsonReader.jsonToJava(member);
-        	System.out.println("DTO formado" + dto);
+            System.out.println("Salvando novo member");
+            com.fasterxml.jackson.databind.ObjectMapper mapper =
+                    new com.fasterxml.jackson.databind.ObjectMapper();
+            MemberDTO dto = mapper.readValue(body, MemberDTO.class);
+            System.out.println("DTO formado: " + dto);
+            // register() existe no MemberRegistration ✓
             memberRegistration.register(dto);
-            System.out.println("Salvo");
-
-            // Create an "ok" response
-            builder = Response.ok().entity(member);
-        } catch (ConstraintViolationException ce) {
-            // Handle bean validation issues
-        	System.out.println("Problema 1");
-            builder = createViolationResponse(ce.getConstraintViolations());
-        } catch (ValidationException e) {
-            // Handle the unique constrain violation
-            Map<String, String> responseObj = new HashMap<>();
-            responseObj.put("email", "Email taken");
-            builder = Response.status(Response.Status.CONFLICT).entity(responseObj);
-            System.out.println("Problema 2");
+            return Response.ok("{\"status\":\"Salvo\"}").build();
+        } catch (javax.validation.ConstraintViolationException e) {
+            return createViolationResponse(e.getConstraintViolations()).build();
         } catch (Exception e) {
-            // Handle generic exceptions
-            Map<String, String> responseObj = new HashMap<>();
-            responseObj.put("error", e.getMessage());
-            builder = Response.status(Response.Status.BAD_REQUEST).entity(responseObj);
-            System.out.println("Problema 3");
+            Map<String, String> err = new HashMap<>();
+            err.put("error", e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(err).build();
         }
-
-        return builder.build();
     }
 
-
-    
-    
-   /* @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response listAll() {
-		Response.ResponseBuilder builder = null;
-		builder = Response.ok();
-		builder.entity(JsonWriter.objectToJson(getService().findAllDTO()));
-		return builder.build();
-    }
-
+    // -----------------------------------------------------------------------
+    // GET /members/{id}
+    // -----------------------------------------------------------------------
     @GET
-	@Path("/{idMember}/{ordinal}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getTeansLeague(@PathParam("idMember") String idMember,@PathParam("ordinal") String ordinal) {
-		Response.ResponseBuilder builder = null;
-
-		RecadoDTO recado = getService().findAllDTO().get(Integer.parseInt(ordinal));
-
-		if (recado == null) {
-			builder = Response.status(Response.Status.BAD_REQUEST).entity("erro");
-			throw new WebApplicationException(Response.Status.NOT_FOUND);
-		} else {
-			builder = Response.ok();
-			builder.entity(JsonWriter.objectToJson(recado));
-		}
-
-		return builder.build();
-	}*/
-    /*
-    @GET
-	@Path("/disciplineYear")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getQuestionByDisciplineAndYear(@QueryParam("discipline") String discipline, @QueryParam("year") String year) {
-		Response.ResponseBuilder builder = null;
-
-		List<Question> questions = questionService.findByDisciplineOrYear(discipline,year);
-
-		if (questions == null) {
-			builder = Response.status(Response.Status.BAD_REQUEST).entity("erro");
-			throw new WebApplicationException(Response.Status.NOT_FOUND);
-		} else {
-			builder = Response.ok();
-			builder.entity(JsonWriter.objectToJson(questions));
-		}
-
-		return builder.build();
-	}
-
-    
-    @GET
-    @Path("/{id:[0-9][0-9]*}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Question lookupMemberById(@PathParam("id") long id) {
-        Question question = questionService.findById(id);
-        if (question == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND);
-        }
-        return question;
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createQuestion(Question question) {
-
-        Response.ResponseBuilder builder = null;
-
+    @Path("/{id}")
+    @Produces("application/json")
+    public Response getMember(@PathParam("id") Long id) {
         try {
-            // Validates member using bean validation
-            //validateMember(member);
-        	if(question.getFontSizeQuestion() == 0){
-        		question.setFontSizeQuestion(12);
-        	}
-
-            questionService.createQuestion(question);
-
-            // Create an "ok" response
-            builder = Response.ok().entity(question);
-        } catch (ConstraintViolationException ce) {
-            // Handle bean validation issues
-            builder = createViolationResponse(ce.getConstraintViolations());
-        } catch (ValidationException e) {
-            // Handle the unique constrain violation
-            Map<String, String> responseObj = new HashMap<>();
-            responseObj.put("email", "Email taken");
-            builder = Response.status(Response.Status.CONFLICT).entity(responseObj);
+            // findByIdDTO() existe no MemberRegistration ✓
+            MemberDTO dto = memberRegistration.findByIdDTO(id);
+            if (dto == null)
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"erro\":\"Membro nao encontrado\"}").build();
+            return Response.ok(
+                    com.cedarsoftware.util.io.JsonWriter.objectToJson(dto)).build();
         } catch (Exception e) {
-            // Handle generic exceptions
-            Map<String, String> responseObj = new HashMap<>();
-            responseObj.put("error", e.getMessage());
-            builder = Response.status(Response.Status.BAD_REQUEST).entity(responseObj);
-        }
-
-        return builder.build();
-    }
-
-
-    private void validateQuestion(Question question) throws ConstraintViolationException, ValidationException {
-        // Create a bean validator and check for issues.
-        Set<ConstraintViolation<Question>> violations = validator.validate(question);
-
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(new HashSet<ConstraintViolation<?>>(violations));
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"erro\":\"" + e.getMessage() + "\"}").build();
         }
     }
 
-    */
-    private Response.ResponseBuilder createViolationResponse(Set<ConstraintViolation<?>> violations) {
-        //log.fine("Validation completed. violations found: " + violations.size());
+    // -----------------------------------------------------------------------
+    // PUT /members/{id}/token  — atualiza token FCM
+    // -----------------------------------------------------------------------
+    @PUT
+    @Path("/{id}/token")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response atualizarToken(@PathParam("id") Long id, String body) {
+        try {
+            // findById() existe no MemberRegistration ✓
+            Member member = memberRegistration.findById(id);
+            if (member == null)
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"erro\":\"Membro nao encontrado\"}").build();
 
-        Map<String, String> responseObj = new HashMap<>();
+            @SuppressWarnings("unchecked")
+            Map<String, Object> campos =
+                    (Map<String, Object>) com.cedarsoftware.util.io.JsonReader.jsonToJava(body);
 
-        for (ConstraintViolation<?> violation : violations) {
-            responseObj.put(violation.getPropertyPath().toString(), violation.getMessage());
+            // setTokenFCM() existe no Member ✓
+            if (campos.get("tokenFCM") != null)
+                member.setTokenFCM((String) campos.get("tokenFCM"));
+            // setLatitude() / setLongitude() existem no Member ✓
+            if (campos.get("latitude") != null)
+                member.setLatitude(Double.parseDouble(campos.get("latitude").toString()));
+            if (campos.get("longitude") != null)
+                member.setLongitude(Double.parseDouble(campos.get("longitude").toString()));
+
+            // CORRECÇÃO: memberRegistration.save() não existe.
+            // O método correcto é persist()+flush() via o EJB.
+            // MemberRegistration.register() faz persist+flush — mas aqui é update, não insert.
+            // Usamos o padrão do próprio projecto: merge via EntityManager.
+            memberRegistration.atualizarMember(member);
+
+            return Response.ok("{\"status\":\"ok\"}").build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"erro\":\"" + e.getMessage() + "\"}").build();
         }
+    }
 
-        return Response.status(Response.Status.BAD_REQUEST).entity(responseObj);
+    // -----------------------------------------------------------------------
+    // PUT /members/{id}/preferencias
+    // -----------------------------------------------------------------------
+    @PUT
+    @Path("/{id}/preferencias")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response atualizarPreferencias(@PathParam("id") Long id, String body) {
+        try {
+            Member member = memberRegistration.findById(id);
+            if (member == null)
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"erro\":\"Membro nao encontrado\"}").build();
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> campos =
+                    (Map<String, Object>) com.cedarsoftware.util.io.JsonReader.jsonToJava(body);
+
+            // setDistanciaAlerta() / setAlertaProximidade() / setEnviarBoletosEmail() existem ✓
+            if (campos.get("distanciaAlerta") != null)
+                member.setDistanciaAlerta(Integer.parseInt(campos.get("distanciaAlerta").toString()));
+            if (campos.get("alertaProximidade") != null)
+                member.setAlertaProximidade((Boolean) campos.get("alertaProximidade"));
+            if (campos.get("enviarBoletosEmail") != null)
+                member.setEnviarBoletosEmail((Boolean) campos.get("enviarBoletosEmail"));
+
+            memberRegistration.atualizarMember(member);
+            return Response.ok("{\"status\":\"ok\"}").build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"erro\":\"" + e.getMessage() + "\"}").build();
+        }
     }
-    
-    public MemberRegistration getService(){
-    	try {
-    		if(memberRegistration == null){
-    			memberRegistration = (MemberRegistration) ServiceLocator.getInstance().getEjb(MemberRegistration.class.getSimpleName(), MemberRegistration.class.getName());
-    		}
-		} catch (NamingException e) {
-			e.printStackTrace();
-		}
-		return memberRegistration;
+
+    private Response.ResponseBuilder createViolationResponse(
+            Set<javax.validation.ConstraintViolation<?>> violations) {
+        Map<String, String> resp = new HashMap<>();
+        for (javax.validation.ConstraintViolation<?> v : violations)
+            resp.put(v.getPropertyPath().toString(), v.getMessage());
+        return Response.status(Response.Status.BAD_REQUEST).entity(resp);
     }
-    
 }

@@ -1,18 +1,28 @@
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\rest\LocationRest.java
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\JsonReader.java
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\JSONPRequestFilter.java
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\rest\AlunoRest.java
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\Convertes.java
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\JaxRsActivator.java
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\RestfulApp.java
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\i18n\LanguageBean.java
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\rest\MemberRest.java
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\escola\controller\MemberController.java
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\rest\LoginRESTService.java
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\EndPoints.java
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\rest\RecadoRest.java
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\Constant.java
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\Service.java
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\rest\LocationRotaRest.java
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\Resources.java
-C:\Users\Abimael Fidencio\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\ServiceLocator.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\firebase\FCMNotificationSender.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\firebase\FirebaseAuthExample.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\firebase\FirebaseInitializer.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\i18n\LanguageBean.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\rest\AlunoRest.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\rest\LocationRest.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\rest\LocationRotaRest.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\rest\LoginRESTService.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\rest\MemberRest.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\rest\RecadoRest.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\schedule\ApiService.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\schedule\MessageScheduler.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\schedule\MessageSchedulerOriginal.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\Constant.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\Convertes.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\DistanceCalculator.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\EndPoints.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\JaxRsActivator.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\JSONPRequestFilter.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\JsonReader.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\LocalizacaoConverter.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\PeriodoDeterminer.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\Resources.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\RestfulApp.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\Service.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\aaf\webInterface\util\ServiceLocator.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\escola\controller\MemberController.java
+C:\Users\a131m\Documents\GitHub\EscolarWebService\src\main\java\org\escolar\controller\ContratoAlunoController.java

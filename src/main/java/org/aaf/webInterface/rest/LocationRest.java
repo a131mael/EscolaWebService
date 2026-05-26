@@ -100,8 +100,7 @@ public class LocationRest {
 		builder.entity(JsonWriter.objectToJson(locDTO));
 		return builder.build();
     }
-	
-	
+		
 	@POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -157,5 +156,6 @@ public class LocationRest {
 		}
 		return locationService;
     }
+    
     
 }
