@@ -145,6 +145,41 @@ public class MemberRest {
         }
     }
 
+    // -----------------------------------------------------------------------
+    // PUT /members/{id}/dados — editar telefone e localização da casa
+    // Body: { "telefone": "48999...", "latitude": -27.6, "longitude": -48.6 }
+    // -----------------------------------------------------------------------
+    @PUT
+    @Path("/{id}/dados")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response atualizarDados(@PathParam("id") Long id, String body) {
+        try {
+            Member member = memberRegistration.findById(id);
+            if (member == null)
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"erro\":\"Membro nao encontrado\"}").build();
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> campos =
+                    (Map<String, Object>) com.cedarsoftware.util.io.JsonReader.jsonToJava(body);
+
+            if (campos.get("telefone") != null)
+                member.setTelefone((String) campos.get("telefone"));
+            if (campos.get("latitude") != null)
+                member.setLatitude(Double.parseDouble(campos.get("latitude").toString()));
+            if (campos.get("longitude") != null)
+                member.setLongitude(Double.parseDouble(campos.get("longitude").toString()));
+
+            memberRegistration.atualizarMember(member);
+            return Response.ok("{\"status\":\"ok\"}").build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"erro\":\"" + e.getMessage() + "\"}").build();
+        }
+    }
+
     private Response.ResponseBuilder createViolationResponse(
             Set<javax.validation.ConstraintViolation<?>> violations) {
         Map<String, String> resp = new HashMap<>();
