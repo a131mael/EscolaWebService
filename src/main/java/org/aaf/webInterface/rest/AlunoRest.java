@@ -23,9 +23,12 @@ import javax.ws.rs.core.Response;
 import org.aaf.escolar.AlunoDTO;
 import org.aaf.escolar.BoletoDTO;
 import org.aaf.escolar.ContratoAlunoDTO;
+import org.aaf.escolar.enums.EscolaEnum;
+import org.escolar.enums.PerioddoEnum;
 import org.escolar.enums.TipoMembro;
 import org.escolar.model.Aluno;
 import org.escolar.model.Boleto;
+import org.escolar.model.Carro;
 import org.escolar.model.Member;
 import org.escolar.service.AlunoService;
 import org.escolar.service.MemberRegistration;
@@ -450,6 +453,141 @@ public class AlunoRest {
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("{\"erro\":\"" + e.getMessage() + "\"}").build();
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // PUT /students/{id}/dados — editar escola, período e endereço
+    // -----------------------------------------------------------------------
+    @PUT @Path("/{id}/dados") @Consumes("application/json") @Produces("application/json")
+    public Response atualizarDados(@PathParam("id") Long idAluno,
+                                   @QueryParam("memberId") Long memberId,
+                                   String body) {
+        try {
+            if (!isFuncionario(memberId))
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity("{\"erro\":\"Apenas funcionarios podem editar dados\"}").build();
+
+            Aluno aluno = alunoService.findById(idAluno);
+            if (aluno == null)
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"erro\":\"Aluno nao encontrado\"}").build();
+
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> campos =
+                    (java.util.Map<String, Object>) com.cedarsoftware.util.io.JsonReader.jsonToJava(body);
+
+            if (campos.get("escola") != null) {
+                try {
+                    aluno.setEscola(EscolaEnum.valueOf(campos.get("escola").toString()));
+                } catch (IllegalArgumentException ignored) {}
+            }
+            if (campos.get("periodo") != null) {
+                try {
+                    aluno.setPeriodo(PerioddoEnum.valueOf(campos.get("periodo").toString()));
+                } catch (IllegalArgumentException ignored) {}
+            }
+            if (campos.get("enderecoAluno") != null)
+                aluno.setEnderecoAluno((String) campos.get("enderecoAluno"));
+
+            alunoService.saveAluno(aluno, false);
+            return Response.ok("{\"status\":\"ok\"}").build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"erro\":\"" + e.getMessage() + "\"}").build();
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // PUT /students/{id}/coordenadas — salvar lat/lon da casa do aluno
+    // -----------------------------------------------------------------------
+    @PUT @Path("/{id}/coordenadas") @Consumes("application/json") @Produces("application/json")
+    public Response atualizarCoordenadas(@PathParam("id") Long idAluno,
+                                         @QueryParam("memberId") Long memberId,
+                                         String body) {
+        try {
+            if (!isFuncionario(memberId))
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity("{\"erro\":\"Apenas funcionarios podem editar coordenadas\"}").build();
+
+            Aluno aluno = alunoService.findById(idAluno);
+            if (aluno == null)
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"erro\":\"Aluno nao encontrado\"}").build();
+
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> campos =
+                    (java.util.Map<String, Object>) com.cedarsoftware.util.io.JsonReader.jsonToJava(body);
+
+            if (campos.get("latitudeAluno") != null)
+                aluno.setLatitudeAluno(Double.parseDouble(campos.get("latitudeAluno").toString()));
+            if (campos.get("longitudeAluno") != null)
+                aluno.setLongitudeAluno(Double.parseDouble(campos.get("longitudeAluno").toString()));
+
+            alunoService.saveAluno(aluno, false);
+            return Response.ok("{\"status\":\"ok\"}").build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"erro\":\"" + e.getMessage() + "\"}").build();
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // PUT /students/{id}/trocas — configurar carros de ida/volta e trocas
+    // Body: { idCarroIda, idCarroIdaTroca1, idCarroIdaTroca2, idCarroIdaTroca3,
+    //         idCarroVolta, idCarroVoltaTroca1, idCarroVoltaTroca2, idCarroVoltaTroca3 }
+    // -----------------------------------------------------------------------
+    @PUT @Path("/{id}/trocas") @Consumes("application/json") @Produces("application/json")
+    public Response atualizarTrocas(@PathParam("id") Long idAluno,
+                                    @QueryParam("memberId") Long memberId,
+                                    String body) {
+        try {
+            if (!isFuncionario(memberId))
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity("{\"erro\":\"Apenas funcionarios podem configurar trocas\"}").build();
+
+            Aluno aluno = alunoService.findById(idAluno);
+            if (aluno == null)
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"erro\":\"Aluno nao encontrado\"}").build();
+
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> c =
+                    (java.util.Map<String, Object>) com.cedarsoftware.util.io.JsonReader.jsonToJava(body);
+
+            // IDA (leva para a escola)
+            setCarro(aluno, "idCarroIda",       c, (carro) -> aluno.setCarroLevaParaEscola(carro));
+            setCarro(aluno, "idCarroIdaTroca1",  c, (carro) -> aluno.setCarroLevaParaEscolaTroca(carro));
+            setCarro(aluno, "idCarroIdaTroca2",  c, (carro) -> aluno.setCarroLevaParaEscolaTroca2(carro));
+            setCarro(aluno, "idCarroIdaTroca3",  c, (carro) -> aluno.setCarroLevaParaEscolaTroca3(carro));
+
+            // VOLTA (pega na escola)
+            setCarro(aluno, "idCarroVolta",       c, (carro) -> aluno.setCarroPegaEscola(carro));
+            setCarro(aluno, "idCarroVoltaTroca1", c, (carro) -> aluno.setCarroPegaEscolaTroca(carro));
+            setCarro(aluno, "idCarroVoltaTroca2", c, (carro) -> aluno.setCarroPegaEscolaTroca2(carro));
+            setCarro(aluno, "idCarroVoltaTroca3", c, (carro) -> aluno.setCarroPegaEscolaTroca3(carro));
+
+            alunoService.saveAluno(aluno, false);
+            return Response.ok("{\"status\":\"ok\"}").build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"erro\":\"" + e.getMessage() + "\"}").build();
+        }
+    }
+
+    private void setCarro(Aluno aluno, String key, java.util.Map<String, Object> campos,
+                          java.util.function.Consumer<Carro> setter) {
+        if (campos.containsKey(key)) {
+            Object val = campos.get(key);
+            if (val == null) {
+                setter.accept(null);
+            } else {
+                Carro carro = alunoService.findCarroById(Long.parseLong(val.toString()));
+                if (carro != null) setter.accept(carro);
+            }
         }
     }
 
