@@ -204,8 +204,8 @@ public class AlunoRest {
 
             if (tipo == TipoMembro.MOTORISTA || tipo == TipoMembro.MONITOR) {
                 if (todos) {
-                    // Todos os alunos do ano — motorista/monitor selecciona os seus
-                    for (Aluno a : alunoService.findAlunoDoAnoLetivo())
+                    // Todos os alunos activos — query directa para evitar dependência do configuracaoService
+                    for (Aluno a : alunoService.findAlunosAtivos())
                         resultado.add(alunoService.toDTO(a));
                 } else {
                     resultado = alunoService.findAlunosByMemberCarro(memberId);
