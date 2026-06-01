@@ -323,8 +323,25 @@ public class AlunoRest {
     @GET @Path("/declaracaoIR/{idcontrato}") @Produces("application/pdf")
     public Response getPDFDeclaracaoIR(@PathParam("idcontrato") String idcontrato) {
         try {
-            // byteArrayPDFDeclaracaoIR(Long) — confirmado no AlunoService.java
             byte[] pdf = alunoService.byteArrayPDFDeclaracaoIR(Long.parseLong(idcontrato));
+            return Response.ok(pdf).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"erro\":\"" + e.getMessage() + "\"}").build();
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // GET /students/contratoPDF/{idcontrato} — PDF do contrato de transporte
+    // -----------------------------------------------------------------------
+    @GET @Path("/contratoPDF/{idcontrato}") @Produces("application/pdf")
+    public Response getPDFContrato(@PathParam("idcontrato") String idcontrato) {
+        try {
+            byte[] pdf = alunoService.byteArrayPDFContrato(Long.parseLong(idcontrato));
+            if (pdf == null || pdf.length == 0)
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"erro\":\"PDF do contrato não disponível\"}").build();
             return Response.ok(pdf).build();
         } catch (Exception e) {
             e.printStackTrace();
