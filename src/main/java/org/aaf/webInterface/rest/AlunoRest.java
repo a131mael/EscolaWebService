@@ -185,7 +185,8 @@ public class AlunoRest {
     // -----------------------------------------------------------------------
     @GET
     @Produces("application/json")
-    public Response listarAlunos(@QueryParam("memberId") Long memberId) {
+    public Response listarAlunos(@QueryParam("memberId") Long memberId,
+                                  @QueryParam("todos") @javax.ws.rs.DefaultValue("false") boolean todos) {
         try {
             if (memberId == null)
                 return Response.status(Response.Status.BAD_REQUEST)
@@ -202,8 +203,13 @@ public class AlunoRest {
             TipoMembro tipo = member.getTipoMembro();
 
             if (tipo == TipoMembro.MOTORISTA || tipo == TipoMembro.MONITOR) {
-                // findAlunosByMemberCarro() adicionado ao AlunoService — ver AlunoService.java
-                resultado = alunoService.findAlunosByMemberCarro(memberId);
+                if (todos) {
+                    // Todos os alunos do ano — motorista/monitor selecciona os seus
+                    for (Aluno a : alunoService.findAlunoDoAnoLetivo())
+                        resultado.add(alunoService.toDTO(a));
+                } else {
+                    resultado = alunoService.findAlunosByMemberCarro(memberId);
+                }
 
             } else if (tipo == TipoMembro.ALUNO) {
                 // member.getIdCrianca1() retorna String — confirmado no Member.java
