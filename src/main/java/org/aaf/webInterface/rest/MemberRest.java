@@ -111,6 +111,42 @@ public class MemberRest {
     }
 
     // -----------------------------------------------------------------------
+    // PUT /members/token/by-login  — atualiza token FCM pelo login
+    // -----------------------------------------------------------------------
+    @PUT
+    @Path("/token/by-login")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response atualizarTokenPorLogin(String body) {
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> campos =
+                    (Map<String, Object>) com.cedarsoftware.util.io.JsonReader.jsonToJava(body);
+
+            String login = (String) campos.get("login");
+            String tokenFCM = (String) campos.get("tokenFCM");
+
+            if (login == null || tokenFCM == null)
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"erro\":\"login e tokenFCM obrigatorios\"}").build();
+
+            Member member = memberRegistration.findByLogin(login);
+            if (member == null)
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"erro\":\"Membro nao encontrado: " + login + "\"}").build();
+
+            member.setTokenFCM(tokenFCM);
+            memberRegistration.atualizarMember(member);
+
+            return Response.ok("{\"status\":\"ok\",\"id\":" + member.getId() + "}").build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"erro\":\"" + e.getMessage() + "\"}").build();
+        }
+    }
+
+    // -----------------------------------------------------------------------
     // PUT /members/{id}/preferencias
     // -----------------------------------------------------------------------
     @PUT
@@ -166,6 +202,10 @@ public class MemberRest {
 
             if (campos.get("telefone") != null)
                 member.setTelefone((String) campos.get("telefone"));
+            if (campos.get("email") != null)
+                member.setEmail((String) campos.get("email"));
+            if (campos.get("senha") != null)
+                member.setSenha((String) campos.get("senha"));
             if (campos.get("latitude") != null)
                 member.setLatitude(Double.parseDouble(campos.get("latitude").toString()));
             if (campos.get("longitude") != null)

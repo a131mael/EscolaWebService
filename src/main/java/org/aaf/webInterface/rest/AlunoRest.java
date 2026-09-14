@@ -186,7 +186,8 @@ public class AlunoRest {
     @GET
     @Produces("application/json")
     public Response listarAlunos(@QueryParam("memberId") Long memberId,
-                                  @QueryParam("todos") @javax.ws.rs.DefaultValue("false") boolean todos) {
+                                  @QueryParam("todos") @javax.ws.rs.DefaultValue("false") boolean todos,
+                                  @QueryParam("carroId") Long carroId) {
         try {
             if (memberId == null)
                 return Response.status(Response.Status.BAD_REQUEST)
@@ -204,10 +205,15 @@ public class AlunoRest {
 
             if (tipo == TipoMembro.MOTORISTA || tipo == TipoMembro.MONITOR) {
                 if (todos) {
-                    // Todos os alunos activos — query directa para evitar dependência do configuracaoService
                     for (Aluno a : alunoService.findAlunosAtivos())
                         resultado.add(alunoService.toDTO(a));
+                } else if (carroId != null && carroId > 0) {
+                    // Car ID passado directamente pelo app (motorista configurou o carro no Geral)
+                    // findAlunoByCarro filtra por carroLevaParaEscola OU carroPegaEscola OU trocas
+                    for (Aluno a : alunoService.findAlunoByCarro(carroId))
+                        resultado.add(alunoService.toDTO(a));
                 } else {
+                    // Fallback: tenta via FuncionarioCarro (ligação tradicional)
                     resultado = alunoService.findAlunosByMemberCarro(memberId);
                 }
 
@@ -358,9 +364,10 @@ public class AlunoRest {
                                       @QueryParam("memberId") Long memberId,
                                       String body) {
         try {
-            if (!isFuncionario(memberId))
+            // Permite: funcionários OU o próprio responsável com o aluno vinculado
+            if (!isFuncionario(memberId) && !isResponsavelDoAluno(memberId, idAluno))
                 return Response.status(Response.Status.FORBIDDEN)
-                        .entity("{\"erro\":\"Apenas funcionarios podem editar contatos\"}").build();
+                        .entity("{\"erro\":\"Sem permissão para editar contactos\"}").build();
 
             Aluno aluno = alunoService.findById(idAluno);
             if (aluno == null)
@@ -487,9 +494,9 @@ public class AlunoRest {
                                    @QueryParam("memberId") Long memberId,
                                    String body) {
         try {
-            if (!isFuncionario(memberId))
-                return Response.status(Response.Status.FORBIDDEN)
-                        .entity("{\"erro\":\"Apenas funcionarios podem editar dados\"}").build();
+            // Pais (responsáveis) podem editar endereço, período, série e contactos
+            // Funcionários podem editar tudo incluindo escola
+            boolean ehFuncionario = isFuncionario(memberId);
 
             Aluno aluno = alunoService.findById(idAluno);
             if (aluno == null)
@@ -500,14 +507,21 @@ public class AlunoRest {
             java.util.Map<String, Object> campos =
                     (java.util.Map<String, Object>) com.cedarsoftware.util.io.JsonReader.jsonToJava(body);
 
-            if (campos.get("escola") != null) {
+            // Escola: apenas funcionários
+            if (ehFuncionario && campos.get("escola") != null) {
                 try {
                     aluno.setEscola(EscolaEnum.valueOf(campos.get("escola").toString()));
                 } catch (IllegalArgumentException ignored) {}
             }
+            // Período, série e endereço: todos podem editar
             if (campos.get("periodo") != null) {
                 try {
                     aluno.setPeriodo(PerioddoEnum.valueOf(campos.get("periodo").toString()));
+                } catch (IllegalArgumentException ignored) {}
+            }
+            if (campos.get("serie") != null) {
+                try {
+                    aluno.setSerie(org.escolar.enums.Serie.valueOf(campos.get("serie").toString()));
                 } catch (IllegalArgumentException ignored) {}
             }
             if (campos.get("enderecoAluno") != null)
@@ -558,6 +572,96 @@ public class AlunoRest {
     }
 
     // -----------------------------------------------------------------------
+    // GET /students/rota-carro?carroId=X — crianças do carro COM o papel (LEVA/PEGA/LEVA_TROCA/PEGA_TROCA)
+    // -----------------------------------------------------------------------
+    @GET @Path("/rota-carro") @Produces("application/json")
+    public Response getRotaCarro(@QueryParam("carroId") Long carroId,
+                                  @QueryParam("memberId") Long memberId) {
+        if (carroId == null)
+            return Response.status(Response.Status.BAD_REQUEST).entity("{\"erro\":\"carroId obrigatorio\"}").build();
+        try {
+            // Usa findAlunoByCarro (já tem filtro de ano) e adiciona o papel
+            java.util.List<org.escolar.model.Aluno> alunos = alunoService.findAlunoByCarro(carroId);
+            // Constrói JSON com papel + carro de troca (bidirecional)
+            StringBuilder sb = new StringBuilder("[");
+            boolean first = true;
+            for (org.escolar.model.Aluno a : alunos) {
+                String papel = "OUTRO";
+                Long trocaCarroId = null;
+                String trocaNome = null;
+                if (a.getCarroLevaParaEscola() != null && carroId.equals(a.getCarroLevaParaEscola().getId())) {
+                    papel = "LEVA";
+                    if (a.getCarroLevaParaEscolaTroca() != null) { trocaCarroId = a.getCarroLevaParaEscolaTroca().getId(); trocaNome = a.getCarroLevaParaEscolaTroca().getNome(); }
+                } else if (a.getCarroPegaEscola() != null && carroId.equals(a.getCarroPegaEscola().getId())) {
+                    papel = "PEGA";
+                    if (a.getCarroPegaEscolaTroca() != null) { trocaCarroId = a.getCarroPegaEscolaTroca().getId(); trocaNome = a.getCarroPegaEscolaTroca().getNome(); }
+                } else if (a.getCarroLevaParaEscolaTroca() != null && carroId.equals(a.getCarroLevaParaEscolaTroca().getId())) {
+                    papel = "LEVA_TROCA";
+                    if (a.getCarroLevaParaEscola() != null) { trocaCarroId = a.getCarroLevaParaEscola().getId(); trocaNome = a.getCarroLevaParaEscola().getNome(); }
+                } else if (a.getCarroPegaEscolaTroca() != null && carroId.equals(a.getCarroPegaEscolaTroca().getId())) {
+                    papel = "PEGA_TROCA";
+                    if (a.getCarroPegaEscola() != null) { trocaCarroId = a.getCarroPegaEscola().getId(); trocaNome = a.getCarroPegaEscola().getNome(); }
+                } else if (a.getCarroLevaParaEscolaTroca2() != null && carroId.equals(a.getCarroLevaParaEscolaTroca2().getId())) {
+                    papel = "LEVA_TROCA";
+                } else if (a.getCarroPegaEscolaTroca2() != null && carroId.equals(a.getCarroPegaEscolaTroca2().getId())) {
+                    papel = "PEGA_TROCA";
+                }
+                org.aaf.escolar.AlunoDTO dto = alunoService.toDTO(a);
+                if (a.getIrmao1() != null) dto.setIdIrmao1(String.valueOf(a.getIrmao1().getId()));
+                if (a.getIrmao2() != null) dto.setIdIrmao2(String.valueOf(a.getIrmao2().getId()));
+                if (a.getIrmao3() != null) dto.setIdIrmao3(String.valueOf(a.getIrmao3().getId()));
+                if (a.getIrmao4() != null) dto.setIdIrmao4(String.valueOf(a.getIrmao4().getId()));
+                if (!first) sb.append(","); first = false;
+                String dtoJson = com.cedarsoftware.util.io.JsonWriter.objectToJson(dto);
+                if (dtoJson.endsWith("}")) {
+                    String extras = ",\"papel\":\"" + papel + "\"";
+                    if (trocaCarroId != null) extras += ",\"trocaCarroId\":" + trocaCarroId;
+                    if (trocaNome != null) extras += ",\"trocaCarroNome\":\"" + trocaNome.replace("\"","\\\"").trim() + "\"";
+                    dtoJson = dtoJson.substring(0, dtoJson.length()-1) + extras + "}";
+                }
+                sb.append(dtoJson);
+            }
+            sb.append("]");
+            return Response.ok(sb.toString()).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(500).entity("{\"erro\":\"" + (e.getMessage() != null ? e.getMessage() : "erro") + "\"}").build();
+        }
+    }
+
+    // GET /students/{id}/trocas — obter configuração actual de carros de ida/volta
+    // -----------------------------------------------------------------------
+    @GET @Path("/{id}/trocas") @Produces("application/json")
+    public Response getTrocas(@PathParam("id") Long idAluno) {
+        try {
+            Aluno aluno = alunoService.findById(idAluno);
+            if (aluno == null)
+                return Response.status(Response.Status.NOT_FOUND).entity("{\"erro\":\"Aluno nao encontrado\"}").build();
+
+            StringBuilder sb = new StringBuilder("{");
+            appendCarroId(sb, "idCarroIda",        aluno.getCarroLevaParaEscola());
+            appendCarroId(sb, "idCarroIdaTroca1",  aluno.getCarroLevaParaEscolaTroca());
+            appendCarroId(sb, "idCarroIdaTroca2",  aluno.getCarroLevaParaEscolaTroca2());
+            appendCarroId(sb, "idCarroIdaTroca3",  aluno.getCarroLevaParaEscolaTroca3());
+            appendCarroId(sb, "idCarroVolta",      aluno.getCarroPegaEscola());
+            appendCarroId(sb, "idCarroVoltaTroca1",aluno.getCarroPegaEscolaTroca());
+            appendCarroId(sb, "idCarroVoltaTroca2",aluno.getCarroPegaEscolaTroca2());
+            appendCarroId(sb, "idCarroVoltaTroca3",aluno.getCarroPegaEscolaTroca3());
+            if (sb.length() > 1 && sb.charAt(sb.length()-1) == ',') sb.setLength(sb.length()-1);
+            sb.append("}");
+            return Response.ok(sb.toString()).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"erro\":\"" + e.getMessage() + "\"}").build();
+        }
+    }
+
+    private void appendCarroId(StringBuilder sb, String key, org.escolar.model.Carro carro) {
+        if (carro != null && carro.getId() != null)
+            sb.append("\"").append(key).append("\":").append(carro.getId()).append(",");
+        else
+            sb.append("\"").append(key).append("\":null,");
+    }
+
     // PUT /students/{id}/trocas — configurar carros de ida/volta e trocas
     // Body: { idCarroIda, idCarroIdaTroca1, idCarroIdaTroca2, idCarroIdaTroca3,
     //         idCarroVolta, idCarroVoltaTroca1, idCarroVoltaTroca2, idCarroVoltaTroca3 }
@@ -622,6 +726,16 @@ public class AlunoRest {
      * Verifica se o membro é funcionário (motorista, monitor, secretaria, admin, dono).
      * member.getTipoMembro() retorna TipoMembro (enum) — confirmado no Member.java
      */
+    private boolean isResponsavelDoAluno(Long memberId, Long idAluno) {
+        if (memberId == null || idAluno == null) return false;
+        Member m = memberRegistration.findById(memberId);
+        if (m == null) return false;
+        String id = String.valueOf(idAluno);
+        return id.equals(m.getIdCrianca1()) || id.equals(m.getIdCrianca2()) ||
+               id.equals(m.getIdCrianca3()) || id.equals(m.getIdCrianca4()) ||
+               id.equals(m.getIdCrianca5());
+    }
+
     private boolean isFuncionario(Long memberId) {
         if (memberId == null) return false;
         Member m = memberRegistration.findById(memberId);
