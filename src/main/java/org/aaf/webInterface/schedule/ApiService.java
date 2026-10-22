@@ -17,11 +17,21 @@ public class ApiService {
     private static volatile String cachedToken;
     private static volatile long tokenExpiraEm;
 
+    // Cooldown apos falha -- sem isso, enquanto a Getrak estiver recusando
+    // (429/400/etc), o cache acima nunca chega a ser preenchido e o metodo
+    // tenta de novo a cada 5s pra sempre, mesmo sem nenhuma chance de dar certo.
+    private static volatile long bloqueadoAte;
+    private static final long COOLDOWN_APOS_FALHA_MS = 60L * 1000;
+
     // Método para obter o token de acesso (com cache)
     public static synchronized String getToken() throws IOException {
         long agora = System.currentTimeMillis();
         if (cachedToken != null && agora < tokenExpiraEm) {
             return cachedToken;
+        }
+        if (agora < bloqueadoAte) {
+            throw new IOException("Getrak em cooldown apos falha recente, tentando novamente em "
+                    + ((bloqueadoAte - agora) / 1000) + "s");
         }
 
         String url = "https://api.getrak.com/newkoauth/oauth/token";
@@ -77,6 +87,9 @@ public class ApiService {
             cachedToken = token;
             tokenExpiraEm = agora + (50L * 60 * 1000); // cache por 50min
             return token;
+        } catch (IOException e) {
+            bloqueadoAte = agora + COOLDOWN_APOS_FALHA_MS;
+            throw e;
         } finally {
             con.disconnect();
         }
