@@ -77,7 +77,7 @@ public class MessageScheduler {
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("Erro ao buscar localizacao/token da Getrak: " + e.getMessage());
             } finally {
                 lock.unlock();
             }
